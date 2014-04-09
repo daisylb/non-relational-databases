@@ -35,7 +35,45 @@ Adrian thinks NoSQL is a stupid term and sounds like a Microsoft product.
 ---
 class: center, middle, inverse
 
-## Key-Value Databases
+## Key-Value Stores
+
+---
+
+## What is a key-value store?
+
+- Stores key-value pairs
+- Similar to a hash map
+- 
+
+---
+
+## Content-Addressable Data Stores
+
+Some key-value stores accept just a value, and generate a key by passing the value through some sort of hash algorithm.
+
+- Git object store
+    - Values follow predefined binary structure
+    - Keys are simply the SHA-1 hashes of the values
+- Camlistore
+    - Arbitrary binary values
+        - Some features of Camlistore store JSON in values
+    - Keys consist of a hash digest combined with the name of the hashing algorithm
+
+.footnote.citation[(Chacon 2009, Fitzpatrick 2014)]
+
+???
+
+---
+
+## Modelling Other Structures On Top Of Key-Value Stores
+
+Content-addressable stores are often used in such a manner; the generated key is stored and referenced 
+
+- 
+
+???
+
+Of course, this has the disadvantage that the key-value store isn't easily understandable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, it'd be quite difficult to update.
 
 ---
 class: center, middle, inverse
