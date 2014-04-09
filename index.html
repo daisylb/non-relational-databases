@@ -41,12 +41,23 @@ class: center, middle, inverse
 
 ## Key-Value Stores
 
+???
+
+We're going to begin with key-value stores.
+
 ---
 
 ## What is a key-value store?
 
 - Stores key-value pairs
 - Similar to a hash map
+- Some can store a number of datatypes in values, others just byte strings
+
+.footnote.citation[(*Redis* n.d., Fitzpatrick 2014)]
+
+???
+
+So, a key-value store just stores key-value pairs; they're basically a giant hash map. Some key-value stores, like Redis, can store a bunch of different data types in the value field; others only store byte strings.
 
 ---
 
@@ -60,7 +71,7 @@ class: center, middle, inverse
 
 ???
 
-So, why would you use a key-value store? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding those features gives you something that's simpler, making it easier to scale it up, to deal with lots of data, really fast. Amazon, for instance, found that for many of their services, they only needed to pull out entities by their primary key, so those services use a key-value store.
+So, why would you use a key-value store? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding those features gives you something that's simpler, making it easier to scale it up, so you can deal with lots of data, really fast. Amazon, for instance, found that for many of their services, they only needed to pull out entities by their primary key, so they use a key-value store for those services.
 
 ---
 
@@ -92,9 +103,9 @@ Some key-value stores accept just a value, and generate a key by passing the val
 
 ???
 
-There are key-value stores that are really just value stores. You put a value in them, and it generates a key based on that value, using some sort of hashing algorithm.
+There are some key-value stores that are really just value stores. You put a value in them, and it generates a key based on that value, using some sort of hashing algorithm.
 
-Git's object store is one of them; when an object is created, the SHA-1 sum of that object's entire contents is that object's ref, and other objects refer to it with that ref. Interestingly, Git's database is, with some exceptions, the filesystem - the keys are the filenames, and the values are the file contents.
+The version control system Git's object store is one of them; when an object is created, the SHA-1 sum of that object's entire contents is that object's ref, and other objects refer to it with that ref. Interestingly, Git's database is essentially the filesystem - with some exceptions, the keys are the filenames, and the values are the file contents.
 
 Another one is called Camlistore; you can throw arbitrary binary data at it, and then refer to it with the combination of the hash of that data and the name of the hashing algorithm - that way, it's not locked down to SHA-1.
 
@@ -109,10 +120,8 @@ It's a common practice to use key-value stores to model other, more complex stru
 
 Content-addressable stores are often used in such a manner (although, by their nature, they can't model any cyclic structures\*).
 
-- Git objects are one of four types (commit, tree, blob, tag) with pre-defined structures, which form a directed, acyclic graph
-- Some features of Camlistore store JSON documents which refer to the keys of other entries
-    - Filesystem feature models a DAG
-    - Photos feature similar to a document-oriented database
+- Git objects are one of four types (commit, tree, blob, tag) with pre-defined structures, which form a directed, acyclic graph.
+- Some features of Camlistore store JSON documents which refer to the keys of other entries, similar to a document-oriented database.
 
 Naturally, the DBMS is oblivious to all of this.
 
@@ -123,9 +132,11 @@ Naturally, the DBMS is oblivious to all of this.
 
 ???
 
-So, you can use 
+So, you can use key-value stores to store more complex data, by storing some sort of structure in the value field. This is often what content-addressable stores are used for; Git has pre-defined binary structures for the four types of objects it keeps in the object store, which refer to each others' keys to make a sort of directed, acyclic graph. Camlistore has a concept of a 'schema blob', which is an entry where the value is a valid JSON object, making it sort of like a document-oriented database.
 
-Of course, this has the disadvantage that the contents of the database isn't easily human-readable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, these kinds of databases would be quite difficult to edit manually.
+The actual DBMS usually doesn't know or care what you store in it, so of course you don't get all of the validation and querying capabilities of a proper document or graph database.
+
+Of course, this has the disadvantage that the contents of the database isn't easily human-readable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, these kinds of databases would be quite difficult to edit manually; your UI would just go 'here's a key, and here is a blob of bytes'.
 
 ---
 
@@ -142,13 +153,13 @@ Focusing on Apache CouchDB
 
 ???
 
-Now, we move on to document-oriented databases. There's a whole range of them out there, and unlike relational DBMSes they work very differently, so we're going to focus on CouchDB, a document-oriented DBMS made by the Apache Foundation.
+Now, we move on to document-oriented databases. There's a whole range of them out there, and unlike relational DBMSes which are all more or less similar, each of them works very differently, so we're going to focus on CouchDB, a document-oriented DBMS made by the Apache Foundation.
 
 ---
 
 ## What is a document?
 
-- Each document is a map of key-value pairs
+- Semi-structured data
 - Generally represented in JSON, or a similar format like YAML or BSON
 - Sometimes represented in XML
 
@@ -165,6 +176,7 @@ A text-based serialisation format based on JavaScript objects.
 
 ```json
 {
+    '_id': 'post:1',
     'title': 'Hello World',
     'body': 'This is my first blog post...',
 }
@@ -174,11 +186,11 @@ A text-based serialisation format based on JavaScript objects.
 
 ???
 
-Most document-oriented DBMSes consider a 'document' to be some sort of semistructured data structure; CouchDB uses JSON, MongoDB uses a JSON-based binary format called BSON; there are others that use XML.
+Most document-oriented DBMSes consider a 'document' to be some sort of semistructured data structure; CouchDB uses JSON, MongoDB uses a binary JSON representation called BSON; there are others that use XML.
 
-JSON is based on JavaScript objects, which are basically key-value maps; here the key-value pairs in a document describe different attributes of the same entity, unlike in the key-value stores in the previous section where each key-value pair is a different entity.
+JSON is this serialisation format that's based on JavaScript objects, which are basically key-value maps; here the key-value pairs in a document describe different attributes of the same entity, unlike in the key-value stores in the previous section where each key-value pair is a different entity. The keys are strings, and the values can be any of those datatypes in that list.
 
-You'll notice in that list of data types that we can store multi-valued attributes inside a document, which we can't do in a relational database; the implications of that are discussed a few slides along.
+You'll notice that we can store multi-valued attributes inside a document, including a whole object inside an object, which we can't do in a relational database; the implications of this, we'll discuss in a second.
 
 ---
 
@@ -188,10 +200,11 @@ A **collection** of documents.
 
 - In some document DBMSes, collections are like relations; all members are of a similar type.
 - In others (like CouchDB), collections are like databases; they contain all of the documents related to a particular application in one big heap.
+    - Types are usually denoted by a `type` attribute (or similar) in the document.
 
 ???
 
-So, document-oriented DBMSes store collections of these documents. Some DBMSes allow you to have multiple collections 
+So, document-oriented DBMSes store collections of these documents. Some DBMSes allow you to have multiple collections for each type of object. Others are more designed to have a single collection you dump everything into, and you denote what kind of object you're storing by describing it in a 'type' attribute.
 
 ---
 
@@ -201,20 +214,23 @@ So, document-oriented DBMSes store collections of these documents. Some DBMSes a
 
 ### Relational Database
 
-#### Invoices
+#### Invoice
 
 | Ref | Customer | Date |
 |-
 | DOEJ001 | Jane Doe | 2014-02-03 |
 | SMIJ002 | John Smith | 2014-02-04 |
 
-#### InvoiceItems
+#### InvoiceItem
 
 | InvoiceRef | ItemNum | Description | Amount | Price |
 |-
 | DOEJ001 | 1 | Widget | 2 | 20.55 |
 | DOEJ001 | 2 | Wodget | 1 | 8 |
 
+???
+
+Now, we move on to the advantages of document-oriented databases. One of them is that documents are nice and self contained. Take this example of an invoicing system; in the relational version, we have one relation that contains *some* of the information about the invoice, and then we have this other relation that contains all of the line items for all of the invoices lumped together.
 
 ---
 
@@ -246,9 +262,13 @@ So, document-oriented DBMSes store collections of these documents. Some DBMSes a
 
 ???
 
-Earlier, when talking about key-value stores, I mentioned that key-value stores that store data structures as values aren't human readable without the help of software that understands the specific data structure in use.
+This is a document that you might find in a document database storing the same data, and it's much more self-contained; all of the data is just there.
 
-This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the 
+Earlier, when talking about key-value stores, I mentioned that if you store a data structure as a value, it won't be human readable without the help of software that understands the specific data structure in use.
+
+This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the relational version, if you tried to edit a particular invoice using something like PhpMyAdmin, you'd have to go back and forth between two tables, and the data you cared about would be lumped in with all this irrelevant data about other invoices.
+
+This is also a lot nicer to develop with, too; you don't have to do any joins or anything, the data you want is just there.
 
 ---
 
@@ -256,9 +276,10 @@ This is sort of the opposite; the document makes complete sense to a human in it
 
 Some things to note:
 
-- Not an unconstrained free-for-all
-- Multi-valued attributes aren't always useful - sometimes you want two distinct, related objects
+- Not an unconstrained free-for-all.
+- Multi-valued attributes aren't always useful - sometimes you want two distinct, related objects.
     - You can do this in a similar manner to a relational database, but this causes problems...
+    - Or, you can just de-normalise, but then you can't validate.
 
 .footnote.citation[(Anderson 2010)]
 
@@ -268,37 +289,55 @@ There's a few things to note here.
 
 Firstly, you might be thinking that a document-oriented database is just a free-for-all - you can just add whatever attributes and values you like, and the database quickly becomes a completely unstructured mess.
 
-Because of this, CouchDB allows you to specify *validation functions*, which are bits of code that are run on every document whenever it's added or updated. They can inspect the document, check attributes' presence, type, value, whatever, and then either accept or reject them.
+Because of this issue, CouchDB allows you to specify *validation functions*, which are bits of code that are run on every document whenever it's added or updated. They can inspect the document, check attributes' presence, type, value, whatever, and then either accept or reject them.
 
-Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example from an Anglican Church database, you have churches belonging to a parish, but you still want to be able to deal with churches as a first-class entity.
+Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example from an Anglican Church database, you have churches belonging to a parish, but sometimes still want to be able to deal with the church as a first-class entity, with it's own document in the system.
 
 You can just save the parish ID as an attribute of the church, as you would in a relational database, but these validation functions don't have any access to outside context, so you can't validate the ID actually belongs to an existing parish. There are also problems with querying, which I'll go into later.
+
+Typically, the solution to this is just to de-normalise - store a copy of some of the parish data along with each church. But, in CouchDB at least, those validation functions don't have access to context. So, there's no way to actually ensure that your denormalised data stays consistent at a database level.
 
 ---
 
 ## Querying a Document-Oriented DB with Map-Reduce
 
+- Programming model used by Google to perform parallel, distributed queries on large datasets
+- Inspired by functional programming languages like Lisp
 - Written in a regular programming language
 - Map-reduce views consist of two functions:
     - Map: convert each document to a key-value pair
-    - Reduce: combine key-value pairs
+    - Reduce: combine pairs that share the same key
 - Not very efficient when run ad-hoc, but *very* cacheable when stored
+
+.footnote.citation[(Dean & Ghemawat 2004, Anderson 2010)]
+
+???
+
+So, we have our data stored as documents, how do we query it?
+
+CouchDB only provides one querying mechanism, and that is Map-Reduce, which is a model that's based on concepts from functional programming, originally used by Google. You perform a map-reduce query by writing two functions: a map function, which is run on each document and generates a key-value pair, and a reduce function, which combines pairs with the same key.
+
+These functions are written in regular programming languages; out of the box, CouchDB uses Javascript, but you can also install plugins that let you use languages that aren't terrible.
+
+In CouchDB's implementation, map-reduce queries aren't very efficient when they're run ad-hoc, but when you store them as views, they can be very efficient.
 
 ---
 
 ## The Map Function
 
-The map function is run once on every document in the database.
-
-It takes one document as input, and emits zero or more key-value pairs.
-
-### Some Example Map Functions
+The map function is run once on every document in the database. It takes one document as input, and *emits* zero or more key-value pairs.
 
 ```js
 function(doc){
     if (doc['type'] == 'blog_post' && doc['tags']){
+        // filter out only the attributes we want
+        var new_doc = {
+            title: doc['title'],
+            tags: doc['tags']
+        };
+        // emit once for each tag
         for (i = 0; i < doc['tags'].length; i++){
-            emit(doc['tags'][i], doc);
+            emit(doc['tags'][i], new_doc);
         }
     }
 }
@@ -312,29 +351,46 @@ function(doc){
 }
 ```
 
+.footnote.citation[(Dean & Ghemawat 2004, Anderson 2010)]
+
+???
+
+The Map function is run once on every document, and emits key-value pairs. From here, you can select, by skipping over documents you don't want without emitting anything. You can project, by emitting a document that only has the attributes you want. You can sort, because the final output will be sorted according to the key. In the first example, we're both selecting and projecting.
+
+It's worth pointing out that the keys don't have to be unique in the final output, so with the first example, we could not have a reduce function at all, and we'd have a list of tags and blog posts with that tag. Then, we could look up all the entries with a specific tag as the key, and get a list of all the blog posts.
+
+The other thing is, there's no way to pass parameters in to map or reduce functions, for reasons that will become apparent in a couple of slides, so what I just described is really the only way to do something like getting all the posts with a specific tag. This isn't a property of map-reduce so much as a property of CouchDB's implementation, though.
+
 ---
 
 ## The Reduce Function
 
----
+???
 
-## Examples of Map-Reduce
-
-- Selection (`WHERE` in SQL): Map function only emits some documents 
-- Projection (`SELECT ... FROM` in SQL): Map function only emits some attributes of a document
-- Ordering (`ORDER BY` in SQL): Map function the attribute(s) to order by as the key
-- Aggregation (`GROUP BY` in SQL): Aggregate in the reduce function
-- Joining (`JOIN` in SQL): This is more difficult...
+The reduce function is where you perform aggregation.
 
 ---
 
 ## Making Map-Reduce Efficient
 
+- Map and reduce functions are deterministic
+- Run once on each document, and stored
+- When a document is updated, only values affected by that document need to be recalculated
+- Results stored in a binary tree
+
+TODO: make diagram
+
+???
+
+So, running queries on every document in the database might sound inefficient, but CouchDB doesn't do this every time you try to read from a view; it does it once, then stores the result in a binary tree sorted on keys, which allows it to pull out a key or a range of keys really fast.
+
+Of course, this is why the functions don't have access to context, can't have parameters passed in, and so on. It's also why you can't run ad-hoc queries, especially not if you have lots of data or the database is under lots of load.
+
 ---
 
-## Limitations
+## Limitations of CouchDB Map-Reduce
 
-Map functions and reduce functions must be idempotent, as their output is cached. This causes problems. For example:
+The deterministic nature of map-reduce functions causes problems. For example:
 
 > For each church, display the name of the church, the name of the parish, and the parish priest.
 
@@ -353,16 +409,28 @@ FROM churches c JOIN parishes p ON (...)
 
 ???
 
-run n+1 queries; denormalise
+So, because map and reduce functions don't have access to context, you can't do anything equivalent to a SQL join.
+
+In this example, the relational case is nice and simple, but in the CouchDB case we have to query two separate views and match them up ourselves. And, this is a case where we're dealing with a small amount of data, around 80 churches. If we had a large dataset and we wanted to deal with 10 at a time, we'd have to do up to 11 queries each time; one to get the list of churches, and one on each record to get the parish details.
 
 ---
 
 ## Map-Reduce-Merge
 
 - Proposed by researchers from Yahoo and UCLA
+- Introduces relational capabilities into map-reduce
 - Adds a third step, "merge", after map and reduce
+    - Combines input from two map-reduce queries
+    - Merge function written as if it is run on the Cartesian product of map-reduce outputs
+    - Partition selector skips over unrelated chunks so the *entire* Cartesian product does not have to be processed
 
 .footnote.citation[(Yang et. al., 2007)]
+
+???
+
+There is an extension of map-reduce called map-reduce-merge, which is proposed in a paper from some Yahoo researchers and UCLA.
+
+They introduce a third function, called 'merge', which combines the output of two map-reduce functions, thus allowing you to perform joins. Unfortunately, as best as I can tell, you end up having to essentially implement the join algorithm yourself, unlike in a SQL database, where you just tell the DBMS to join two tables and it does so in whichever manner it thinks is best.
 
 ---
 
