@@ -116,7 +116,11 @@ A text-based serialisation format based on JavaScript objects.
 
 ???
 
-Documents are generally maps of key-value pairs. 
+Most document-oriented DBMSes consider a 'document' to be some sort of semistructured data structure; CouchDB uses JSON, MongoDB uses a JSON-based binary format called BSON; there are others that use XML.
+
+JSON is based on JavaScript objects, which are basically key-value maps; here the key-value pairs in a document describe different attributes of the same entity, unlike in the key-value stores in the previous section where each key-value pair is a different entity.
+
+You'll notice in that list of data types that we can store multi-valued attributes inside a document, which we can't do in a relational database; the implications of that are discussed a few slides along.
 
 ---
 
@@ -124,9 +128,12 @@ Documents are generally maps of key-value pairs.
 
 A **collection** of documents.
 
-In some document DBMSes (like MongoDB), collections are like relations; all members are of a similar type.
+- In some document DBMSes, collections are like relations; all members are of a similar type.
+- In others (like CouchDB), collections are like databases; they contain all of the documents related to a particular application in one big heap.
 
-In others (like CouchDB)
+???
+
+So, document-oriented DBMSes store collections of these documents. Some DBMSes allow you to have multiple collections 
 
 ---
 
@@ -278,6 +285,27 @@ FROM churches c JOIN parishes p ON (...)
 - Adds a third step, "merge", after map and reduce
 
 .footnote.citation[(Yang et. al., 2007)]
+
+---
+
+## Ordinary Queries on a Document-Oriented Database
+
+While CouchDB can only be queried using map-reduce, MongoDB collections can be queried in a manner reminiscent of SQL.
+
+```javascript
+mongo.churches.find({name: 'Christ Church'})
+mongo.blogPosts.find({'address.suburb': {$in: ['Adelaide', 'North Adelaide']}})
+```
+
+Sadly, Mongo doesn't support anything analogous to SQL `JOIN`s.
+
+.footnote.citation[(Kleinman 2013)]
+
+???
+
+It's worth pointing out that map-reduce is not the only way you can query a document-oriented database. MongoDB does support map-reduce, but you can also query a collection by expressing your query as a JavaScript object, with a syntax that's very reminiscent of SQL. You can even set indexes on attributes, as you can in relational DBMSes.
+
+Unfortunately, Mongo also doesn't support JOINs.
 
 ---
 
