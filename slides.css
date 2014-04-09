@@ -140,3 +140,28 @@ img {
     float: right;
     padding-top: 1em;
 }
+
+/* Download link */
+.dl-link {
+    display: none;
+}
+.remark-slide:hover .dl-link {
+    display: block;
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    padding: 0.5em;
+    background-color: #383933;
+    color: inherit;
+    border-radius: 0.5em;
+}
+
+.remark-slide:hover .dl-link:hover {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    padding: 0.5em;
+    background-color: #494a44;
+    color: inherit;
+    border-radius: 0.5em;
+}
