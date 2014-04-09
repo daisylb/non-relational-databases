@@ -199,15 +199,22 @@ This is sort of the opposite; the document makes complete sense to a human in it
 Some things to note:
 
 - Not an unconstrained free-for-all
-- Still possible to have relationships between objects like in a relational database - but this causes problems when querying
+- Multi-valued attributes aren't always useful - sometimes you want two distinct, related objects
+    - You can do this in a similar manner to a relational database, but this causes problems...
 
 .footnote.citation[(Anderson 2010)]
 
 ???
 
-So, you might be thinking that a document-oriented database is just a free-for-all - you can just add whatever attributes and values you like, and the database quickly becomes a completely unstructured mess.
+There's a few things to note here.
 
-Because of this, CouchDB allows you to specify *validation functions*, which are run on every document whenever it's added or updated.
+Firstly, you might be thinking that a document-oriented database is just a free-for-all - you can just add whatever attributes and values you like, and the database quickly becomes a completely unstructured mess.
+
+Because of this, CouchDB allows you to specify *validation functions*, which are bits of code that are run on every document whenever it's added or updated. They can inspect the document, check attributes' presence, type, value, whatever, and then either accept or reject them.
+
+Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example from an Anglican Church database, you have churches belonging to a parish, but you still want to be able to deal with churches as a first-class entity.
+
+You can just save the parish ID as an attribute of the church, as you would in a relational database, but these validation functions don't have any access to outside context, so you can't validate the ID actually belongs to an existing parish. There are also problems with querying, which I'll go into later.
 
 ---
 
