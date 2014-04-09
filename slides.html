@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+
+      body {
+        font-family: 'Droid Serif';
+        font-size: 20px;
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      h1 { font-size: 4em; }
+      h2 { font-size: 2em; }
+      h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      .citation {
+        color: #999;
+        font-size: 0.8em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        -moz-border-radius: 5px;
+        -web-border-radius: 5px;
+        background: #e7e8e2;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      code.remark-code {
+        display: block;
+        padding: 0.5em;
+      }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      td, th {
+          padding: .3em;
+      }
+
+      table, td, th {
+          border: 1px solid #999;
+          margin: 0;
+      }
+      
+      table {
+          margin: .7em;
+          border-collapse: collapse;
+      }
+
+      th {
+          background-color: #ccc;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse
+
+# Non-Relational Databases
+Adam Brenecki, Adrian Colbert
+
+---
+## What is a non-relational database?
+
+- Database systems that don't use a relational model
+- Also referred to as **NoSQL**
+- ...sometimes
+
+## What are we covering today?
+
+- Key-value databases
+- Document-oriented databases
+- Graph databases
+- BigTable
+
+---
+class: center, middle, inverse
+
+## Key-Value Databases
+
+---
+class: center, middle, inverse
+
+## Document-Oriented Databases
+
+Focusing on CouchDB
+
+---
+
+## What is a document?
+
+- Each document is a map of key-value pairs
+- Generally stored in JSON, or a similar format
+- Often stored in JSON (or similar formats like YAML or BSON) or XML
+
+### JSON
+
+- Object (key-value map, string keys, heterogenous values)
+- List (ordered list)
+- Number
+- String (Unicode)
+- Boolean (`true`, `false`)
+- Null (`null`)
+
+```json
+{
+    'title': 'Hello World',
+    'body': 'This is my first blog post...',
+}
+```
+
+.footnote.citation[(Ecma International 2013)]
+
+---
+
+## What is a document-oriented database?
+
+- Collection of documents
+- Some 
+
+---
+
+## Why use a document-oriented database?
+
+**Example:** Database for an invoicing system.
+
+### Relational Database
+
+#### Invoices
+
+| Ref | Customer | Date |
+|-
+| DOEJ001 | Jane Doe | 2014-02-03 |
+| SMIJ002 | John Smith | 2014-02-04 |
+
+#### InvoiceItems
+
+| InvoiceRef | ItemNum | Description | Amount | Price |
+|-
+| DOEJ001 | 1 | Widget | 2 | 20.55 |
+| DOEJ001 | 2 | Wodget | 1 | 8 |
+
+
+---
+
+## Why use a document-oriented database?
+
+### Document-Oriented Database
+
+```json
+{
+    'type': 'invoice',
+    'id': 'DOEJ001',
+    'customer': 'Jane Doe',
+    'items': [
+        {
+            'description': 'Widget',
+            'amount': 2,
+            'price': 20.55,
+        },
+        {
+            'description': 'Wodget',
+            'amount': 1,
+            'price': 8,
+        },
+    ],
+}
+```
+
+.footnote.citation[(Anderson 2010 ch. 1)]
+
+---
+
+## Why use a document-oriented database?
+
+---
+
+## Querying a Document-Oriented DB with Map-Reduce
+
+- Written in a regular programming language
+- Map-reduce views specify two functions:
+    - Map: convert each document to a key-value pair
+    - Reduce: combine key-value pairs
+- Not very efficient on their own, but *very* cacheable
+- Only need to update the results of 
+
+---
+
+## The Map Function
+
+The map function is run once on every document in the database.
+
+**Input:** One document.  
+
+### An Example Map Function
+
+```
+map(object):
+    if the object is a church:
+        emit(object.parish, 1)
+    else
+        return null
+```
+
+---
+
+## The Reduce Function
+
+---
+
+## Examples of Map-Reduce
+
+- Selection (`WHERE` in SQL): Map function only emits some documents 
+- Projection (`SELECT ... FROM` in SQL): Map function only emits some attributes of a document
+- Ordering (`ORDER BY` in SQL): Map function the attribute(s) to order by as the key
+- Aggregation (`GROUP BY` in SQL): Aggregate in the reduce function
+- Joining (`JOIN` in SQL): This is more difficult...
+
+---
+
+## Making Map-Reduce Efficient
+
+---
+
+## Limitations
+
+Map functions and reduce functions must be idempotent, as their output is cached. This causes problems. For example:
+
+> For each church, display the name of the church, the name of the parish, and the parish priest.
+
+### SQL
+
+```sql
+SELECT c.name, p.name, p.priest
+FROM churches c JOIN parishes p ON (...)
+```
+
+### CouchDB map-reduce
+
+- One CouchDB view returns church names and parish UUIDs
+- Another view returns parish UUIDs, parish names, and parish priests
+- The calling application has to then match them up
+
+---
+
+## Map-Reduce-Merge
+
+- Proposed by researchers from Yahoo and UCLA
+- Adds a third step, "merge", after map and reduce
+
+.footnote.citation[(Yang et. al., 2007)]
+
+    </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-0.6.3.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
