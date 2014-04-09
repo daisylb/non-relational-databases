@@ -228,11 +228,21 @@ class: center, middle, inverse
 
 ## Graph Databases
 
+Focusing on the GOOD model
+
+---
+
+![Evolution of databases](images/evolution_of_databases.png)
+
+.footnote.citation[(Angles & Gutierrez, 2008, Fig. 1)]
+
+???
+
+- Evolution of database types
+
 ---
 
 ## What is a graph database?
-
-###Example: Graph-Oriented Object Database Model (GOOD)
 
 - Nodes with relationships
 
@@ -252,26 +262,129 @@ class: center, middle, inverse
 - Depending on implementation, can be constructed and queried with a common programming language, like C++
 - Can be traversed or queried with recursive methods
 - Updates, additions and deletions are performed just like a linked list
-- For example, if wanted to delete all Classical Music, delete the Info node with String 'Classical Music'
 - Queries tend to involve performing transforming actions on the database which results in another database graph, usually temporary.
-- 
 
 ---
 
 ![An example of a simple GOOD database](images/good_example.png)
 
-.footnote.citation[(Gyssens et. al., 1994)]
+.footnote.citation[(Gyssens et. al., 1994, Fig. 2)]
+
+???
+
+- As you can clearly see, there are a series of repeated node patterns joined together.
+- The basic node patterns constitute the schema, which are then joined with associations to form the database.
+- For example, if wanted to delete all Classical Music, delete the Info node with String 'Classical Music'
 
 ---
 
 ## Why use a graph database?
 
-- Connections between data as as important as data itself, or more so
+- Connections between data are as important as data itself, or more so
 - Obvious example is social networking due to many-to-many associations
+- Performance considerations versus relational databases for certain data sets
+- 
 
 .footnote.citation[(Angles & Gutierrez, 2008) (Holzschuher & Peinl, 2013)]
 
 ---
+## Performance of Relational versus Graph
+
+- Testing of Cypher and JPA MySQL queries on the same data
+
+- 200MB of dummy friendship data of the form:
+
+| Person | Activity |
+|-
+| first and last name | title |
+| birthday, age | body |
+| gender | verb |
+| interests (2-5) | time stamp |
+| messages (2-5) | actor |
+| affiliations with organisations (0-3) | object |
+| addresses (1-2) | target |
+| group memberships (0-5) | generator |
+| activities (1-25) | |
+
+
+.footnote.citation[(Holzschuher & Peinl, 2013, Table 1: Data for people and activities)]
+
+???
+
+- Cypher being a graph query language
+- Java Persistence API MySQL is a Java variant of MySQL
+- Data converted from graph/object to relational with Hibernate Object Relational Mapping, which is a Java library
+- REST is an architectural style. Was used in the design of HTTP1.1
+- 
+
+---
+
+## Performance of Relational versus Graph
+
+| Organisation | Message | Address |
+|-
+| name | title | street name |
+| sector | text | house number |
+| website | time stamp | city name |
+| address | 1-3 recipients | zip code |
+| | | state |
+| | | country |
+| | | longitude, latitude |
+
+- Total of 10,003 'people' and 137,000 'friendships'
+
+- Average of 28 friendships per person
+
+
+.footnote.citation[(Holzschuher & Peinl, 2013, Table 2: Data for organisations, messages and addresses)]
+
+---
+## Performance of Relational versus Graph
+
+Example of Cypher query used:
+
+```
+START person=node:people(id = {id})
+MATCH person-[:FRIEND_OF]->friend-[:FRIEND_OF]->friend_of_friend
+WHERE no (friend_of_friend<-[:FRIEND_OF]-person)
+RETURN friend_of_friend, COUNT(*)
+ORDER BY COUNT(*) DESC
+```
+Example of SQL query used:
+
+```
+SELECT persondb0.ID, persondb0.display_name
+FROM person persondb0
+WHERE persondb0.oid IN (
+SELECT frienddb2.friend_id
+FROM person persondb1, friend frienddb2
+WHERE persondb1.oid=frienddb2.person_id
+AND (persondb1.person_id IN(?)))
+```
+
+.footnote.citation[(Holzschuher & Peinl, 2013)]
+
+---
+
+## Performance of Relational versus Graph
+
+Results, edited for clarity
+
+| Person benchmark | Cypher REST | Cypher | JPA MySQL |
+|-
+| 2,000 people | 4,600ms | 180ms | 30,010ms |
+| 200 * 10 people | 2,038ms | 173ms | 6,474ms |
+| 2,000 people's friends | 7,347ms | 931ms | 3,558,882ms|
+| 200 * 10 people's friends | 4,381ms | 850ms | 384,025ms |
+
+.footnote.citation[(Holzschuher & Peinl, 2013, Table 3: Person benchmark for 10,000 people, average time needed, average over 10 runs)]
+
+???
+
+- Cypher REST is where the queries were run over a network to the database running on a server. The JPA MySQL implementation ran into errors and was also super slow, so they discarded it and investigated other graph query languages.
+
+---
+
 class: center, middle, inverse
 
 # Thank You
