@@ -25,14 +25,16 @@ adambrenecki.github.io/non-relational-databases
 
 ## What are we covering today?
 
-- Key-value databases
+- Key-value stores
 - Document-oriented databases
 - Graph databases
 - BigTable
 
 ???
 
-Adrian thinks NoSQL is a stupid term and sounds like a Microsoft product.
+A non-relational database is any database that stores its data in any format other than tabular relations. The term is more or less synonymous with "NoSQL", depending on who you ask.
+
+Of the many kinds of non-relational databases out there, the ones we'll cover are key-value stores, document-oriented databases, graph databases, and BigTable.
 
 ---
 
@@ -49,7 +51,7 @@ Adrian thinks NoSQL is a stupid term and sounds like a Microsoft product.
 
 ???
 
-The most obvious question to ask at this point is, what's wrong with relational databases? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding them gives you something that's simpler, making it easier to scale it up to dealing with lots of data, really fast.
+The most obvious question to ask at this point is, what's wrong with relational databases? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding those features gives you something that's simpler, making it easier to scale it up, to deal with lots of data, really fast.
 
 Amazon found that for many of their services, they only needed to pull out entities by their primary key, so they opted for a key-value store.
 
