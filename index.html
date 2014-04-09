@@ -37,25 +37,6 @@ A non-relational database is any database that stores its data in any format oth
 Of the many kinds of non-relational databases out there, the ones we'll cover are key-value stores, document-oriented databases, graph databases, and BigTable.
 
 ---
-
-## Why wouldn't you use a relational database?
-
-- No need for all of the features of a relational DBMS
-- Simpler, easier to scale
-
-### Examples
-
-- Amazon: key-value store
-
-.footnote.citation[(DeCandia et. al. 2007)]
-
-???
-
-The most obvious question to ask at this point is, what's wrong with relational databases? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding those features gives you something that's simpler, making it easier to scale it up, to deal with lots of data, really fast.
-
-Amazon found that for many of their services, they only needed to pull out entities by their primary key, so they opted for a key-value store.
-
----
 class: center, middle, inverse
 
 ## Key-Value Stores
@@ -66,6 +47,20 @@ class: center, middle, inverse
 
 - Stores key-value pairs
 - Similar to a hash map
+
+---
+
+## Why use a key-value store?
+
+- No need for all of the features of a relational DBMS
+- Only a need to query entries by primary key
+- Much, much simpler and eaiser to scale
+
+.footnote.citation[(DeCandia et. al. 2007)]
+
+???
+
+So, why would you use a key-value store? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding those features gives you something that's simpler, making it easier to scale it up, to deal with lots of data, really fast. Amazon, for instance, found that for many of their services, they only needed to pull out entities by their primary key, so those services use a key-value store.
 
 ---
 
@@ -284,11 +279,10 @@ You can just save the parish ID as an attribute of the church, as you would in a
 ## Querying a Document-Oriented DB with Map-Reduce
 
 - Written in a regular programming language
-- Map-reduce views specify two functions:
-- Map: convert each document to a key-value pair
-- Reduce: combine key-value pairs
-- Not very efficient on their own, but *very* cacheable
-- Only need to update the results of 
+- Map-reduce views consist of two functions:
+    - Map: convert each document to a key-value pair
+    - Reduce: combine key-value pairs
+- Not very efficient when run ad-hoc, but *very* cacheable when stored
 
 ---
 
@@ -296,16 +290,26 @@ You can just save the parish ID as an attribute of the church, as you would in a
 
 The map function is run once on every document in the database.
 
-**Input:** One document.  
+It takes one document as input, and emits zero or more key-value pairs.
 
-### An Example Map Function
+### Some Example Map Functions
 
+```js
+function(doc){
+    if (doc['type'] == 'blog_post' && doc['tags']){
+        for (i = 0; i < doc['tags'].length; i++){
+            emit(doc['tags'][i], doc);
+        }
+    }
+}
 ```
-map(object):
-if the object is a church:
-emit(object.parish, 1)
-else
-return null
+
+```js
+function(doc){
+    if (doc['type'] == 'church'){
+        emit(doc['parish'], 1);
+    }
+}
 ```
 
 ---
