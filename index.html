@@ -266,9 +266,9 @@ This is a document that you might find in a document database storing the same d
 
 Earlier, when talking about key-value stores, I mentioned that if you store a data structure as a value, it won't be human readable without the help of software that understands the specific data structure in use.
 
-This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the relational version, if you tried to edit a particular invoice using something like PhpMyAdmin, you'd have to go back and forth between two tables, and the data you cared about would be lumped in with all this irrelevant data about other invoices.
+This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the relational version, if you tried to edit a particular invoice using something like PhpMyAdmin, you'd have to go back and forth between two tables, and the data you cared about would be lumped in with all this irrelevant data about other invoices. Here, it's all together.
 
-This is also a lot nicer to develop with, too; you don't have to do any joins or anything, the data you want is just there.
+Developers also get to take advantage of this self-contained nature; you don't have to do any joins or anything, the data you want is just there.
 
 ---
 
@@ -291,11 +291,11 @@ Firstly, you might be thinking that a document-oriented database is just a free-
 
 Because of this issue, CouchDB allows you to specify *validation functions*, which are bits of code that are run on every document whenever it's added or updated. They can inspect the document, check attributes' presence, type, value, whatever, and then either accept or reject them.
 
-Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example from an Anglican Church database, you have churches belonging to a parish, but sometimes still want to be able to deal with the church as a first-class entity, with it's own document in the system.
+Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example, you have churches belonging to a parish, but sometimes you still want to be able to deal with the church as a first-class entity, in it's own document.
 
-You can just save the parish ID as an attribute of the church, as you would in a relational database, but these validation functions don't have any access to outside context, so you can't validate the ID actually belongs to an existing parish. There are also problems with querying, which I'll go into later.
+You could just save the parish ID as an attribute on the church, as you would in a relational database, but these validation functions don't have any access to outside context, so you can't validate the ID actually belongs to an existing parish. There are also problems with querying, which I'll go into later.
 
-Typically, the solution to this is just to de-normalise - store a copy of some of the parish data along with each church. But, in CouchDB at least, those validation functions don't have access to context. So, there's no way to actually ensure that your denormalised data stays consistent at a database level.
+Typically, the solution to this is just to de-normalise - store a copy of some of the parish data along with each church. But, we come back to validation functions not having access to context. So, there's no way to actually ensure that your denormalised data stays consistent at a database level.
 
 ---
 
@@ -357,9 +357,9 @@ function(doc){
 
 The Map function is run once on every document, and emits key-value pairs. From here, you can select, by skipping over documents you don't want without emitting anything. You can project, by emitting a document that only has the attributes you want. You can sort, because the final output will be sorted according to the key. In the first example, we're both selecting and projecting.
 
-It's worth pointing out that the keys don't have to be unique in the final output, so with the first example, we could not have a reduce function at all, and we'd have a list of tags and blog posts with that tag. Then, we could look up all the entries with a specific tag as the key, and get a list of all the blog posts.
+It's worth pointing out that the keys don't have to be unique in the final output, so with the first example, we could not have a reduce function at all, and we'd have a list of all of the blog posts for all of the tags, and we could look at a slice of that list to get all of the blog posts for a certain tag.
 
-The other thing is, there's no way to pass parameters in to map or reduce functions, for reasons that will become apparent in a couple of slides, so what I just described is really the only way to do something like getting all the posts with a specific tag. This isn't a property of map-reduce so much as a property of CouchDB's implementation, though.
+The other thing is, there's no way to pass parameters in to map or reduce functions, so what I just described is really the only way to do something like getting all the posts with a specific tag. This isn't a property of map-reduce so much as a property of CouchDB's implementation, though.
 
 ---
 
@@ -382,9 +382,9 @@ TODO: make diagram
 
 ???
 
-So, running queries on every document in the database might sound inefficient, but CouchDB doesn't do this every time you try to read from a view; it does it once, then stores the result in a binary tree sorted on keys, which allows it to pull out a key or a range of keys really fast.
+So, running arbitrary code on every document in the database might sound inefficient, but CouchDB doesn't do this every time you try to read from a view; it does it once, then stores the result in a binary tree sorted on keys, which allows it to pull out a key or a range of keys really fast.
 
-Of course, this is why the functions don't have access to context, can't have parameters passed in, and so on. It's also why you can't run ad-hoc queries, especially not if you have lots of data or the database is under lots of load.
+Of course, this is why the functions don't have access to context, can't have parameters passed in, and so on. It's also why it's a bad idea to run run ad-hoc queries, especially not if you have lots of data or the database is under lots of load, because then you are running this code on every document.
 
 ---
 
