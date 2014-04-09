@@ -179,9 +179,28 @@ In others (like CouchDB)
 
 .footnote.citation[(Anderson 2010 ch. 1)]
 
+???
+
+Earlier, when talking about key-value stores, I mentioned that key-value stores that store data structures as values aren't human readable without the help of software that understands the specific data structure in use.
+
+This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the 
+
 ---
 
 ## Why use a document-oriented database?
+
+Some things to note:
+
+- Not an unconstrained free-for-all
+- Still possible to have relationships between objects like in a relational database - but this causes problems when querying
+
+.footnote.citation[(Anderson 2010)]
+
+???
+
+So, you might be thinking that a document-oriented database is just a free-for-all - you can just add whatever attributes and values you like, and the database quickly becomes a completely unstructured mess.
+
+Because of this, CouchDB allows you to specify *validation functions*, which are run on every document whenever it's added or updated.
 
 ---
 
