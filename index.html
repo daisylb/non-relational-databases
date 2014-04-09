@@ -401,7 +401,7 @@ Focusing on the GOOD model
 
 - Nodes with relationships
 
-- Comparable to a multidimensional linked list
+- In terms of implementation, comparable to a multidimensional linked list
 
 - Updates, additions and deletions are performed just like a linked list
 
@@ -466,7 +466,7 @@ Focusing on the GOOD model
 
 ???
 
-- Cypher being a graph query language
+- Cypher being a graph query language, based loosely on SQL, among other languages. Designed more for queries than updates etc.
 - Java Persistence API MySQL is a Java variant of MySQL
 - Data converted from graph/object to relational with Hibernate Object Relational Mapping, which is a Java library
 - REST is an architectural style. Was used in the design of HTTP1.1
@@ -520,11 +520,15 @@ AND (persondb1.person_id IN(?)))
 
 .footnote.citation[(Holzschuher & Peinl, 2013)]
 
+???
+
+- Both these queries are intended to return a list of friends of friends who aren't also your friends. The SQL query isn't complete as it was too large to even be presented in the paper.
+
 ---
 
 ## Performance of Relational versus Graph
 
-Results, edited for clarity
+### Results, edited for clarity
 
 | Person benchmark | Cypher REST | Cypher | JPA MySQL |
 |-
@@ -533,14 +537,202 @@ Results, edited for clarity
 | 2,000 people's friends | 7,347ms | 931ms | 3,558,882ms|
 | 200 * 10 people's friends | 4,381ms | 850ms | 384,025ms |
 
+- Graph queries scale well when dealing with highly interconnected data
+
+- SQL queries require more calls the more complex the query
+
+- Recursive queries can be written and run once, depending on specific implementation
+
 .footnote.citation[(Holzschuher & Peinl, 2013, Table 3: Person benchmark for 10,000 people, average time needed, average over 10 runs)]
 
 ???
 
 - Cypher REST is where the queries were run over a network to the database running on a server. The JPA MySQL implementation ran into errors and was also super slow, so they discarded it and investigated other graph query languages.
+- SQL queries would need to be called repeatedly to achieve the same result. First to get all the people's profiles. Then on each person to get their friends. Cypher can do this in one query.
 
 ---
 
+class: center, middle, inverse
+
+## Google's Bigtable
+
+An example of a specific non-relational database
+
+---
+
+## What is Bigtable?
+
+- Bigtable is a Google developed distributed storage system designed to work within Google File System and be scalable to the order of petabytes
+
+- Bigtable is used by Crawl, Analytics, Earth, YouTube, Gmail and other Google services
+
+- Can make use of MapReduce to query or generate metadata
+
+- Storage is referenced by a row key, column key and a timestamp
+
+.footnote.citation[(Chang et. al., 2008)]
+
+???
+
+- Crawl is Googles indexing thingo for webpages
+
+---
+
+## How does Bigtable work?
+
+### Context
+
+- The storage referenced by a set of keys is known as a <b>cell</b>
+
+- A <b>table</b> is a "sparse, distributed, persistent multidimensional sorted map" of cells
+
+- A <b>cluster</b> is a set of processes that run Bigtable software and serve a set of tables
+
+- A cluster can run across a set of machines and relies on Google cluster management for resource management etc
+
+.footnote.citation[(Chang et. al., 2008)]
+
+---
+
+## How does Bigtable work?
+
+### Rows
+
+- Data is ordered by row keys
+
+- Row keys are arbitrary strings up to 64kB
+
+- Rows with consecutive keys are grouped into <b>tablets</b> up to around 1GB for resource management
+
+- Querying Bigtable can be highly efficient if consecutive row values are chosen for data
+
+For example, using reversed URLs:
+
+```
+maps.google.com/index.html
+```
+
+becomes
+
+```
+com.google.maps/index.html```
+
+
+.footnote.citation[(Chang et. al., 2008)]
+
+---
+
+## How does Bigtable work?
+
+### Columns
+
+- Column keys are also strings
+
+- Columns are grouped into families, which are compressed together for memory efficiency
+
+- Column keys are of the form <i>family:qualifier</i>
+
+For example, a family of referring websites:
+
+```
+anchor:google.com
+anchor:wordpress.com
+anchor:flinders.edu.au
+```
+
+- Access control is performed at the column family level
+
+
+.footnote.citation[(Chang et. al., 2008)]
+
+---
+
+## How does Bigtable work?
+
+### Timestamps
+
+- Timestamps can be applied arbitrarily or using default values, which are "real time" in milliseconds
+
+- Timestamps are used for versioning
+
+- Can also be used for garbage collection, such as removal of old data
+
+
+.footnote.citation[(Chang et. al., 2008)]
+
+---
+
+## How does Bigtable work?
+
+### Example "tuple"
+
+![An example of a Bigtable "tuple"](images/bigtable.png)
+
+.footnote.citation[(Chang et. al., 2008)]
+
+---
+
+## How is Bigtable used?
+
+Writing to Bigtable:
+```
+//Open the table
+Table *T = OpenOrDie("/bigtable/web/webtable");
+//Write a new anchor and delete old anchor
+RowMutation r1(T, "com.cnn.www");
+r1.Set("anchor:www.c-span.org", "CNN");
+r1.Delete("anchor:www.abc.com");
+Operation op;
+Apply(&op, &r1);
+```
+Reading from Bigtable:
+
+```
+Scanner scanner(T);
+ScanStream *stream;
+stream = scanner.FetchColumnFamily("anchor");
+stream->SetReturnAllVersions();
+scanner.Lookup("com.cnn.www");
+for (; !stream->Done(); stream->Next()) {
+	printf("%s %s %lld %s\n",
+		scanner.RowName(),
+		stream->ColumnName(),
+		stream->MicroTimestamp(),
+		stream->Value());
+```
+
+
+.footnote.citation[(Chang et. al., 2008, Fig. 2. & Fig. 3.)]
+
+???
+
+- These are written in C++. Bigtable API provides functions for everything.
+- Bigtable supports the execution of scripts written in Sawzall, which is a Google-made language for processing data.
+
+---
+## Example Bigtable implementation
+
+### Continulously Changing Data Objects
+
+- CCDOs may include GPS data, trajectories, state information, wind speed etc.
+
+Proposed 'schema':
+
+| Key type | Family | Description |
+|-
+| Row | | Unique ID of CDDO |
+| Column | CCDO.description | Description of the CCDO |
+| | Trajectory.dynamics | Various information possibly including points like maximum velocity, temperature rate of change etc. |
+| | Reported_State | Individual state reports from each sensor, such as instantaneous velocity, longitude etc. |
+
+.footnote.citation[(Yu et. al., 2012)]
+
+???
+
+- The Yu et al paper suggests future multi-sensor platforms for things like environmental monitoring.
+- Yu et al envision this sort of implementation collecting data over time that scales up to potential exabytes.
+- Since Bigtable has implicit versioning, this could be used easily to build up a picture over time.
+---
 # Bibliography
 
 TODO: EXPORT BIBLIOGRAPHY FROM ZOTERO
