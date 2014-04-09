@@ -33,6 +33,25 @@ adambrenecki.github.io/non-relational-databases
 Adrian thinks NoSQL is a stupid term and sounds like a Microsoft product.
 
 ---
+
+## Why wouldn't you use a relational database?
+
+- No need for all of the features of a relational DBMS
+- Simpler, easier to scale
+
+### Examples
+
+- Amazon: key-value store
+
+.footnote.citation[(DeCandia et. al. 2007)]
+
+???
+
+The most obvious question to ask at this point is, what's wrong with relational databases? In many cases, we're dealing with applications that don't need all of the features you get in a relational database, and shedding them gives you something that's simpler, making it easier to scale it up to dealing with lots of data, really fast.
+
+Amazon found that for many of their services, they only needed to pull out entities by their primary key, so they opted for a key-value store.
+
+---
 class: center, middle, inverse
 
 ## Key-Value Stores
@@ -43,7 +62,18 @@ class: center, middle, inverse
 
 - Stores key-value pairs
 - Similar to a hash map
-- 
+
+---
+
+## Querying a key-value store
+
+- You have a key
+- You get a value
+- That is all
+
+???
+
+Querying a key-value store is pretty straightforward. You have a key, you get a value. There's no selection, projection, aggregation, joins, nothing.
 
 ---
 
@@ -63,17 +93,46 @@ Some key-value stores accept just a value, and generate a key by passing the val
 
 ???
 
+There are key-value stores that are really just value stores. You put a value in them, and it generates a key based on that value, using some sort of hashing algorithm.
+
+Git's object store is one of them; when an object is created, the SHA-1 sum of that object's entire contents is that object's ref, and other objects refer to it with that ref. Interestingly, Git's database is, with some exceptions, the filesystem - the keys are the filenames, and the values are the file contents.
+
+Another one is called Camlistore; you can throw arbitrary binary data at it, and then refer to it with the combination of the hash of that data and the name of the hashing algorithm - that way, it's not locked down to SHA-1.
+
 ---
 
 ## Modelling Other Structures On Top Of Key-Value Stores
 
-Content-addressable stores are often used in such a manner; the generated key is stored and referenced 
+It's a common practice to use key-value stores to model other, more complex structures.
 
-- 
+- Each value has a pre-determined structure opaque to the DBMS but understood by the application
+- Values contain references to the keys of other key-value pairs, similar to pointers or foreign keys
+
+Content-addressable stores are often used in such a manner (although, by their nature, they can't model any cyclic structures\*).
+
+- Git objects are one of four types (commit, tree, blob, tag) with pre-defined structures, which form a directed, acyclic graph
+- Some features of Camlistore store JSON documents which refer to the keys of other entries
+    - Filesystem feature models a DAG
+    - Photos feature similar to a document-oriented database
+
+Naturally, the DBMS is oblivious to all of this.
+
+.footnote[
+\* Not always true - see Eastman .citation[(2013)].  
+.citation[(Chacon 2009, Fitzpatrick 2014)]
+]
 
 ???
 
-Of course, this has the disadvantage that the key-value store isn't easily understandable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, it'd be quite difficult to update.
+So, you can use 
+
+Of course, this has the disadvantage that the contents of the database isn't easily human-readable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, these kinds of databases would be quite difficult to edit manually.
+
+---
+
+## Key-Value Stores at Scale
+
+.footnote.citation[(DeCandia et. al. 2007)]
 
 ---
 class: center, middle, inverse
@@ -284,6 +343,10 @@ FROM churches c JOIN parishes p ON (...)
 - Another view returns parish UUIDs, parish names, and parish priests
 - The calling application has to then match them up
 
+???
+
+run n+1 queries; denormalise
+
 ---
 
 ## Map-Reduce-Merge
@@ -486,7 +549,9 @@ TODO: EXPORT BIBLIOGRAPHY FROM ZOTERO
 
 This is our bibliography.
 
-If you'd like to know more about document-oriented databases, *CouchDB: The Definitive Guide* by Chris Anderson is an excellent resource; it includes examples of building a real-world blog engine using nothing but CouchDB. Camlistore is also a really interesting project that's worth checking out.
+If you'd like to know more about document-oriented databases, *CouchDB: The Definitive Guide* by Chris Anderson is an excellent resource; it includes examples of building a real-world blog engine using nothing but CouchDB.
+
+Camlistore is also a really interesting project that's worth checking out. They're basically trying to create this sort of personal content management system to end all content management systems, something that can store and sync files, blog posts, pictures, whatever, in such a way that the user is in control.
 
 ---
 class: center, middle, inverse
