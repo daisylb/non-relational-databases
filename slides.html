@@ -1,149 +1,149 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Title</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <style type="text/css">
-      @import url(http://fonts.googleapis.com/css?family=Droid+Serif);
-      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+    <style type="text/css">
+    @import url(http://fonts.googleapis.com/css?family=Droid+Serif);
+    @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
 
-      body {
+    body {
         font-family: 'Droid Serif';
         font-size: 20px;
-      }
-      h1, h2, h3 {
+    }
+    h1, h2, h3 {
         font-family: 'Yanone Kaffeesatz';
         font-weight: 400;
         margin-bottom: 0;
-      }
-      h1 { font-size: 4em; }
-      h2 { font-size: 2em; }
-      h3 { font-size: 1.6em; }
-      .footnote {
+    }
+    h1 { font-size: 4em; }
+    h2 { font-size: 2em; }
+    h3 { font-size: 1.6em; }
+    .footnote {
         position: absolute;
         bottom: 3em;
-      }
-      .citation {
+    }
+    .citation {
         color: #999;
         font-size: 0.8em;
-      }
-      li p { line-height: 1.25em; }
-      .red { color: #fa0000; }
-      .large { font-size: 2em; }
-      a, a > code {
+    }
+    li p { line-height: 1.25em; }
+    .red { color: #fa0000; }
+    .large { font-size: 2em; }
+    a, a > code {
         color: rgb(249, 38, 114);
         text-decoration: none;
-      }
-      code {
+    }
+    code {
         -moz-border-radius: 5px;
         -web-border-radius: 5px;
         background: #e7e8e2;
         border-radius: 5px;
         font-size: 16px;
-      }
-      code.remark-code {
+    }
+    code.remark-code {
         display: block;
         padding: 0.5em;
-      }
-      .pull-left {
+    }
+    .pull-left {
         float: left;
         width: 47%;
-      }
-      .pull-right {
+    }
+    .pull-right {
         float: right;
         width: 47%;
-      }
-      .pull-right ~ p {
+    }
+    .pull-right ~ p {
         clear: both;
-      }
-      #slideshow .slide .content code {
+    }
+    #slideshow .slide .content code {
         font-size: 0.8em;
-      }
-      #slideshow .slide .content pre code {
+    }
+    #slideshow .slide .content pre code {
         font-size: 0.9em;
         padding: 15px;
-      }
-      .inverse {
+    }
+    .inverse {
         background: #272822;
         color: #777872;
         text-shadow: 0 0 20px #333;
-      }
-      .inverse h1, .inverse h2 {
+    }
+    .inverse h1, .inverse h2 {
         color: #f3f3f3;
         line-height: 0.8em;
-      }
+    }
 
-      td, th {
-          padding: .3em;
-      }
+    td, th {
+        padding: .3em;
+    }
 
-      table, td, th {
-          border: 1px solid #999;
-          margin: 0;
-      }
-      
-      table {
-          margin: .7em;
-          border-collapse: collapse;
-      }
+    table, td, th {
+        border: 1px solid #999;
+        margin: 0;
+    }
 
-      th {
-          background-color: #ccc;
-      }
+    table {
+        margin: .7em;
+        border-collapse: collapse;
+    }
 
-      /* Slide-specific styling */
-      #slide-inverse .footnote {
+    th {
+        background-color: #ccc;
+    }
+
+    /* Slide-specific styling */
+    #slide-inverse .footnote {
         bottom: 12px;
         left: 20px;
-      }
-      #slide-how .slides {
+    }
+    #slide-how .slides {
         font-size: 0.9em;
         position: absolute;
         top:  151px;
         right: 140px;
-      }
-      #slide-how .slides h3 {
+    }
+    #slide-how .slides h3 {
         margin-top: 0.2em;
-      }
-      #slide-how .slides .first, #slide-how .slides .second {
+    }
+    #slide-how .slides .first, #slide-how .slides .second {
         padding: 1px 20px;
         height: 90px;
         width: 120px;
         -moz-box-shadow: 0 0 10px #777;
         -webkit-box-shadow: 0 0 10px #777;
         box-shadow: 0 0 10px #777;
-      }
-      #slide-how .slides .first {
+    }
+    #slide-how .slides .first {
         background: #fff;
         position: absolute;
         top: 20%;
         left: 20%;
         z-index: 1;
-      }
-      #slide-how .slides .second {
+    }
+    #slide-how .slides .second {
         position: relative;
         background: #fff;
         z-index: 0;
-      }
+    }
 
-      /* Two-column layout */
-      .left-column {
+    /* Two-column layout */
+    .left-column {
         color: #777;
         width: 20%;
         height: 92%;
         float: left;
-      }
-        .left-column h2:last-of-type, .left-column h3:last-child {
-          color: #000;
-        }
-      .right-column {
+    }
+    .left-column h2:last-of-type, .left-column h3:last-child {
+        color: #000;
+    }
+    .right-column {
         width: 75%;
         float: right;
         padding-top: 1em;
-      }
+    }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <textarea id="source">
 
 class: center, middle, inverse
@@ -196,8 +196,8 @@ Focusing on CouchDB
 
 ```json
 {
-    'title': 'Hello World',
-    'body': 'This is my first blog post...',
+'title': 'Hello World',
+'body': 'This is my first blog post...',
 }
 ```
 
@@ -241,21 +241,21 @@ Focusing on CouchDB
 
 ```json
 {
-    'type': 'invoice',
-    'id': 'DOEJ001',
-    'customer': 'Jane Doe',
-    'items': [
-        {
-            'description': 'Widget',
-            'amount': 2,
-            'price': 20.55,
-        },
-        {
-            'description': 'Wodget',
-            'amount': 1,
-            'price': 8,
-        },
-    ],
+'type': 'invoice',
+'id': 'DOEJ001',
+'customer': 'Jane Doe',
+'items': [
+{
+'description': 'Widget',
+'amount': 2,
+'price': 20.55,
+},
+{
+'description': 'Wodget',
+'amount': 1,
+'price': 8,
+},
+],
 }
 ```
 
@@ -271,8 +271,8 @@ Focusing on CouchDB
 
 - Written in a regular programming language
 - Map-reduce views specify two functions:
-    - Map: convert each document to a key-value pair
-    - Reduce: combine key-value pairs
+- Map: convert each document to a key-value pair
+- Reduce: combine key-value pairs
 - Not very efficient on their own, but *very* cacheable
 - Only need to update the results of 
 
@@ -288,10 +288,10 @@ The map function is run once on every document in the database.
 
 ```
 map(object):
-    if the object is a church:
-        emit(object.parish, 1)
-    else
-        return null
+if the object is a church:
+emit(object.parish, 1)
+else
+return null
 ```
 
 ---
@@ -346,7 +346,7 @@ FROM churches c JOIN parishes p ON (...)
     <script src="http://gnab.github.io/remark/downloads/remark-0.6.3.min.js" type="text/javascript">
     </script>
     <script type="text/javascript">
-      var slideshow = remark.create();
+        var slideshow = remark.create();
     </script>
-  </body>
+</body>
 </html>
