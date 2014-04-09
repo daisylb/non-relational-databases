@@ -17,7 +17,7 @@ adambrenecki.github.io/non-relational-databases
 ---
 ## What is a non-relational database?
 
-- Database systems that don't use a relational model
+- Any database that doesn't store data in tabular relations
 - Also referred to as **NoSQL**
 - ...sometimes
 
@@ -42,40 +42,53 @@ class: center, middle, inverse
 
 ## Document-Oriented Databases
 
-Focusing on CouchDB
+Focusing on Apache CouchDB
+
+???
+
+Now, we move on to document-oriented databases. There's a whole range of them out there, and unlike relational DBMSes they work very differently, so we're going to focus on CouchDB, a document-oriented DBMS made by the Apache Foundation.
 
 ---
 
 ## What is a document?
 
 - Each document is a map of key-value pairs
-- Generally stored in JSON, or a similar format
-- Often stored in JSON (or similar formats like YAML or BSON) or XML
+- Generally represented in JSON, or a similar format like YAML or BSON
+- Sometimes represented in XML
 
 ### JSON
+
+A text-based serialisation format based on JavaScript objects.
 
 - Object (key-value map, string keys, heterogenous values)
 - List (ordered list)
 - Number
 - String (Unicode)
-- Boolean (`true`, `false`)
-- Null (`null`)
+- Boolean
+- Null
 
 ```json
 {
-'title': 'Hello World',
-'body': 'This is my first blog post...',
+    'title': 'Hello World',
+    'body': 'This is my first blog post...',
 }
 ```
 
 .footnote.citation[(Ecma International 2013)]
 
+???
+
+Documents are generally maps of key-value pairs. 
+
 ---
 
 ## What is a document-oriented database?
 
-- Collection of documents
-- Some 
+A **collection** of documents.
+
+In some document DBMSes (like MongoDB), collections are like relations; all members are of a similar type.
+
+In others (like CouchDB)
 
 ---
 
@@ -108,21 +121,21 @@ Focusing on CouchDB
 
 ```json
 {
-'type': 'invoice',
-'id': 'DOEJ001',
-'customer': 'Jane Doe',
-'items': [
-{
-'description': 'Widget',
-'amount': 2,
-'price': 20.55,
-},
-{
-'description': 'Wodget',
-'amount': 1,
-'price': 8,
-},
-],
+    'type': 'invoice',
+    'id': 'DOEJ001',
+    'customer': 'Jane Doe',
+    'items': [
+        {
+            'description': 'Widget',
+            'amount': 2,
+            'price': 20.55,
+        },
+        {
+            'description': 'Wodget',
+            'amount': 1,
+            'price': 8,
+        },
+    ],
 }
 ```
 
