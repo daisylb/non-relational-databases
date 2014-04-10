@@ -96,7 +96,6 @@ Some key-value stores accept just a value, and generate a key by passing the val
     - Keys are simply the SHA-1 hashes of the values
 - Camlistore
     - Arbitrary binary values
-        - Some features of Camlistore store JSON in values
     - Keys consist of a hash digest combined with the name of the hashing algorithm
 
 .footnote.citation[(Chacon 2009, Fitzpatrick 2014)]
@@ -105,9 +104,9 @@ Some key-value stores accept just a value, and generate a key by passing the val
 
 There are some key-value stores that are really just value stores. You put a value in them, and it generates a key based on that value, using some sort of hashing algorithm.
 
-The version control system Git's object store is one of them; when an object is created, the SHA-1 sum of that object's entire contents is that object's ref, and other objects refer to it with that ref. Interestingly, Git's database is essentially the filesystem - with some exceptions, the keys are the filenames, and the values are the file contents.
+The version control system Git's object store is one of them; when you store an object, the SHA-1 sum of that object's entire contents becomes its key.
 
-Another one is called Camlistore; you can throw arbitrary binary data at it, and then refer to it with the combination of the hash of that data and the name of the hashing algorithm - that way, it's not locked down to SHA-1.
+Camlistore works similarly, except rather than hard-coding the hash algorithm, the keys contain the name of the hashing algorithm, so it's not locked in to SHA-1.
 
 ---
 
@@ -132,11 +131,9 @@ Naturally, the DBMS is oblivious to all of this.
 
 ???
 
-So, you can use key-value stores to store more complex data, by storing some sort of structure in the value field. This is often what content-addressable stores are used for; Git has pre-defined binary structures for the four types of objects it keeps in the object store, which refer to each others' keys to make a sort of directed, acyclic graph. Camlistore has a concept of a 'schema blob', which is an entry where the value is a valid JSON object, making it sort of like a document-oriented database.
+So, you can use key-value stores to store more complex data, by storing some sort of structure in the value field. The two databases we talked about previously do this; Git models a directed, acyclic graph, and Camlistore has a concept of a 'schema blob', an entry where the value is a valid JSON object, making it sort of like a document-oriented database.
 
 The actual DBMS usually doesn't know or care what you store in it, so of course you don't get all of the validation and querying capabilities of a proper document or graph database.
-
-Of course, this has the disadvantage that the contents of the database isn't easily human-readable unless you happen to know the particular structure in use. If you had a generic UI for editing the contents of a key-value store, something equivalent to PhpMyAdmin or similar, these kinds of databases would be quite difficult to edit manually; your UI would just go 'here's a key, and here is a blob of bytes'.
 
 ---
 
@@ -190,7 +187,7 @@ Most document-oriented DBMSes consider a 'document' to be some sort of semistruc
 
 JSON is this serialisation format that's based on JavaScript objects, which are basically key-value maps; here the key-value pairs in a document describe different attributes of the same entity, unlike in the key-value stores in the previous section where each key-value pair is a different entity. The keys are strings, and the values can be any of those datatypes in that list.
 
-You'll notice that we can store multi-valued attributes inside a document, including a whole object inside an object, which we can't do in a relational database; the implications of this, we'll discuss in a second.
+You'll notice that we can store multi-valued attributes inside a document, including a whole object inside an object, which we can't do in a relational database.
 
 ---
 
@@ -230,7 +227,7 @@ So, document-oriented DBMSes store collections of these documents. Some DBMSes a
 
 ???
 
-Now, we move on to the advantages of document-oriented databases. One of them is that documents are nice and self contained. Take this example of an invoicing system; in the relational version, we have one relation that contains *some* of the information about the invoice, and then we have this other relation that contains all of the line items for all of the invoices lumped together.
+One of the advantages of a document-oriented database is that documents are nice and self contained. Take this example of an invoicing system; in the relational version, we have one relation that contains *some* of the information about the invoice, and then we have this other relation that contains all of the line items for all of the invoices lumped together.
 
 ---
 
@@ -264,11 +261,9 @@ Now, we move on to the advantages of document-oriented databases. One of them is
 
 This is a document that you might find in a document database storing the same data, and it's much more self-contained; all of the data is just there.
 
-Earlier, when talking about key-value stores, I mentioned that if you store a data structure as a value, it won't be human readable without the help of software that understands the specific data structure in use.
+If you were editing this in some sort of generic UI for your DBMS, it'd be quite obvious what's going on, and quite easy to update. In contrast, if you edited the relational version in something like PhpMyAdmin, you'd be editing two different tables, and the data you care about is mixed in with data about other invoices.
 
-This is sort of the opposite; the document makes complete sense to a human in its native form, even more so than a relational database would. In the relational version, if you tried to edit a particular invoice using something like PhpMyAdmin, you'd have to go back and forth between two tables, and the data you cared about would be lumped in with all this irrelevant data about other invoices. Here, it's all together.
-
-Developers also get to take advantage of this self-contained nature; you don't have to do any joins or anything, the data you want is just there.
+It's also simpler to develop for; 
 
 ---
 
@@ -277,6 +272,7 @@ Developers also get to take advantage of this self-contained nature; you don't h
 Some things to note:
 
 - Not an unconstrained free-for-all.
+    - *validation functions* let you ensure that all entries conform to a structure.
 - Multi-valued attributes aren't always useful - sometimes you want two distinct, related objects.
     - You can do this in a similar manner to a relational database, but this causes problems...
     - Or, you can just de-normalise, but then you can't validate.
@@ -291,11 +287,11 @@ Firstly, you might be thinking that a document-oriented database is just a free-
 
 Because of this issue, CouchDB allows you to specify *validation functions*, which are bits of code that are run on every document whenever it's added or updated. They can inspect the document, check attributes' presence, type, value, whatever, and then either accept or reject them.
 
-Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. Take the invoice example on the previous slides; in the relational version, you're unlikely to have a relationship between InvoiceItem and anything other than Invoice. On the other hand, to use a real-world example, you have churches belonging to a parish, but sometimes you still want to be able to deal with the church as a first-class entity, in it's own document.
+Secondly, the multi-valued attributes are really useful when you have a situation where something clearly *belongs* to something else. In our invoice example, it's clear that InvoiceItem belongs to Invoice, but sometimes you have entities that are related, but still stand alone.
 
-You could just save the parish ID as an attribute on the church, as you would in a relational database, but these validation functions don't have any access to outside context, so you can't validate the ID actually belongs to an existing parish. There are also problems with querying, which I'll go into later.
+You can just save the ID of one as an attribute on the other, like a foreign key, but you can't validate the ID because validation functions don't have access to context.
 
-Typically, the solution to this is just to de-normalise - store a copy of some of the parish data along with each church. But, we come back to validation functions not having access to context. So, there's no way to actually ensure that your denormalised data stays consistent at a database level.
+Typically, the solution to this is just to de-normalise - store a copy of some of the parish data along with each church. But, as validation functions don't have access to context, there's no way to actually ensure that your denormalised data stays consistent.
 
 ---
 
@@ -315,7 +311,7 @@ Typically, the solution to this is just to de-normalise - store a copy of some o
 
 So, we have our data stored as documents, how do we query it?
 
-CouchDB only provides one querying mechanism, and that is Map-Reduce, which is a model that's based on concepts from functional programming, originally used by Google. You perform a map-reduce query by writing two functions: a map function, which is run on each document and generates a key-value pair, and a reduce function, which combines pairs with the same key.
+CouchDB only provides one querying mechanism, and that is Map-Reduce, which is a model that's based on concepts from functional programming. You perform a map-reduce query by writing two functions: a map function, which is run on each document and generates a key-value pair, and a reduce function, which performs aggregation.
 
 These functions are written in regular programming languages; out of the box, CouchDB uses Javascript, but you can also install plugins that let you use languages that aren't terrible.
 
@@ -345,8 +341,8 @@ function(doc){
 
 ```js
 function(doc){
-    if (doc['type'] == 'church'){
-        emit(doc['parish'], 1);
+    if (doc['type'] == 'blog_post'){
+        emit(doc['_id'], doc['comments'].length); // emit ID, number of comments
     }
 }
 ```
@@ -357,32 +353,51 @@ function(doc){
 
 The Map function is run once on every document, and emits key-value pairs. From here, you can select, by skipping over documents you don't want without emitting anything. You can project, by emitting a document that only has the attributes you want. You can sort, because the final output will be sorted according to the key. In the first example, we're both selecting and projecting.
 
-It's worth pointing out that the keys don't have to be unique in the final output, so with the first example, we could not have a reduce function at all, and we'd have a list of all of the blog posts for all of the tags, and we could look at a slice of that list to get all of the blog posts for a certain tag.
+The keys don't have to be unique in the final output. In the first example, we could not have a reduce function at all, and we'd have a list of all of the blog posts for all of the tags, and we could look at a slice of that list to get all of the blog posts for a certain tag.
 
-The other thing is, there's no way to pass parameters in to map or reduce functions, so what I just described is really the only way to do something like getting all the posts with a specific tag. This isn't a property of map-reduce so much as a property of CouchDB's implementation, though.
+The other thing is, there's no way to pass parameters in to map or reduce functions, so what I just described is really the only way to do something like getting all the posts with a specific tag. What you can do is specify a key, which tells CouchDB to only return results with that key, or specify a startKey and endKey to return results within.
 
 ---
 
 ## The Reduce Function
 
+- Run on output key-value pairs from the map function
+- Reduces input values to a smaller output value
+- Optional - leave it out if you don't want aggregation
+- Applied to all of the results queried in the view
+    - if a `startKey` and `endKey` is specified when querying the view, only map results between those keys will be reduced
+
+```js
+function(keys, values, rereduce){
+    return sum(values);
+}
+```
+
+.footnote.citation[(*Introduction to CouchDB Views* 2013)]
+
 ???
 
-The reduce function is where you perform aggregation.
+The reduce function is where you perform aggregation. CouchDB will pass in a bunch of values that came out of your map function, and you can calculate an aggregate value. It's only run on the map results that are queried; if the person calling the view says "I only care about results from this key to that key", those are the only map results that'll be passed into your reduce function.
+
+CouchDB won't pass *all* of the entries into your function at once; it'll pass a few in at a time to get intermediate results, then it'll pass those intermediate results in to get a final result. That's what the `rereduce` parameter is for, to indicate if you're dealing with raw values or intermediate results.
 
 ---
 
 ## Making Map-Reduce Efficient
 
 - Map and reduce functions are deterministic
-- Run once on each document, and stored
+- Map functions once on each document, and stored in B-tree
 - When a document is updated, only values affected by that document need to be recalculated
-- Results stored in a binary tree
+- Reduce functions run and stored on each leaf
+- Reduce functions only run at view time when partial leaves are involved
 
 TODO: make diagram
 
 ???
 
-So, running arbitrary code on every document in the database might sound inefficient, but CouchDB doesn't do this every time you try to read from a view; it does it once, then stores the result in a binary tree sorted on keys, which allows it to pull out a key or a range of keys really fast.
+So, running arbitrary code on every document in the database might sound inefficient, but CouchDB doesn't do this every time you try to read from a view. The first time you run a view, the map function is run on every document, but the results are stored in a B-tree. When you update a document, the entry that comes from that document is marked as dirty, and that's the only one that's recalculated the next time the view is run.
+
+With reduce functions, they're run and stored on each leaf of the B-tree. When the view is queried, the value is pulled from the B-tree if an entire leaf is covered between startKey and endKey, and calculated fresh if only part of a leaf is covered.
 
 Of course, this is why the functions don't have access to context, can't have parameters passed in, and so on. It's also why it's a bad idea to run run ad-hoc queries, especially not if you have lots of data or the database is under lots of load, because then you are running this code on every document.
 
